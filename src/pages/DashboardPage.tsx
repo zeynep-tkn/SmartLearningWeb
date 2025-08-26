@@ -49,7 +49,7 @@ export default function DashboardPage() {
 
             const documentId = response.data.documentId;
             setUploadedDocument({ id: documentId, fileName: selectedFile.name });
-            setMessage(`'${selectedFile.name}' başarıyla yüklendi. Şimdi quiz seçeneklerini kullanabilirsiniz.`);
+            setMessage(`'${selectedFile.name}' başarıyla yüklendi.`);
             
             // Dosya seçme alanını temizle
             if(fileInputRef.current) {
