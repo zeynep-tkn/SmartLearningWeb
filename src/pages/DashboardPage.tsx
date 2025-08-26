@@ -141,8 +141,11 @@ export default function DashboardPage() {
                         <button onClick={handlePdfDownload} disabled={isLoading} className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg shadow-md disabled:bg-green-400">
                             {isLoading ? 'Oluşturuluyor...' : 'PDF Olarak İndir'}
                         </button>
-                        <button onClick={() => navigate(`/quiz/${uploadedDocument.id}`)} disabled={isLoading} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-md disabled:bg-blue-400">
-                            Web'de Çöz
+                       <button 
+                           onClick={() => navigate(`/quiz/${uploadedDocument.id}?count=${questionCount}`)} 
+                           disabled={isLoading} 
+                           className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-md disabled:bg-blue-400">
+                           Web'de Çöz
                         </button>
                     </div>
                 </div>

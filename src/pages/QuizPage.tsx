@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react'; //import React , { useEffect, useState } from 'react'; 
+import { useParams, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { getToken } from '../auth';
 
@@ -15,6 +15,7 @@ const optionLetters = ['A', 'B', 'C', 'D', 'E'];
 
 export default function QuizPage() {
     const { documentId } = useParams<{ documentId: string }>();
+    const [searchParams] = useSearchParams();
     const [questions, setQuestions] = useState<QuizQuestion[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -32,6 +33,9 @@ export default function QuizPage() {
     useEffect(() => {
         const fetchQuiz = async () => {
             if (!documentId) return;
+
+            const questionCount = searchParams.get('count') || '10';
+
             const token = getToken();
             if (!token) {
                 setError("Giriş yapılmamış.");
@@ -40,20 +44,21 @@ export default function QuizPage() {
             }
             try {
                 const response = await axios.post(
-                    `https://localhost:7101/api/quiz/generate-from-document/${documentId}`,
+                   `https://localhost:7101/api/quiz/generate-from-document/${documentId}?questionCount=${questionCount}`,
                     {},
-                    { headers: { 'Authorization': `Bearer ${token}` } }
+                    { 
+                    headers: { 'Authorization': `Bearer ${token}` } }
                 );
                 setQuestions(response.data);
             } catch (err) {
-                setError("Quiz yüklenirken bir hata oluştu.");
+                setError("Quiz yüklenirken bir hata oluştu. Lütfen 2 dk sonra tekrar deneyin");
                 console.error(err);
             } finally {
                 setLoading(false);
             }
         };
         fetchQuiz();
-    }, [documentId]);
+    }, [documentId, searchParams]);
 
     const handleAnswerChange = (questionIndex: number, optionIndex: number) => {
         setUserAnswers({ ...userAnswers, [questionIndex]: optionIndex });
@@ -81,7 +86,7 @@ export default function QuizPage() {
             .map(q => q.questionText);
 
         if (wrongQuestionsText.length === 0) {
-            setStudyPlan("Tebrikler, tüm soruları doğru bildiniz! Tekrar etmeniz gereken bir konu bulunmuyor.");
+            setStudyPlan("Tebrikler, tüm soruları doğru bildiniz! Düzenli konu tekraı yapmanız yeterli");
             setIsPlanLoading(false);
             return;
         }
@@ -100,6 +105,32 @@ export default function QuizPage() {
         } finally {
             setIsPlanLoading(false);
         }
+    };
+
+     const StudyPlanDisplay = ({ plan }: { plan: string }) => {
+     const planItems = plan.split('\n').filter(line => line.trim() !== '');
+        
+        return (
+            <div className="space-y-4">
+                {planItems.map((item, index) => {
+                    const isListItem = /^\d+\.\s/.test(item.trim());
+                    const content = item.replace(/^\d+\.\s/, '');
+
+                    if (isListItem) {
+                        return (
+                            <div key={index} className="flex items-start p-4 bg-white rounded-lg border border-gray-200">
+                                <div className="flex-shrink-0 w-6 h-6 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center font-bold text-sm mr-4 mt-1">
+                                    {item.trim().match(/^\d+/)?.[0]}
+                                </div>
+                                <p className="text-gray-700">{content}</p>
+                            </div>
+                        );
+                    }
+                    // Madde olmayan satırları başlık veya alt başlık olarak göster
+                    return <p key={index} className="text-gray-600 font-semibold">{item}</p>;
+                })}
+            </div>
+        );
     };
     
     // Yükleme ve Hata durumları için arayüz
@@ -183,7 +214,7 @@ export default function QuizPage() {
                                 {isPlanLoading ? "Oluşturuluyor..." : "Tekrar Planı Oluştur"}
                             </button>
                         ) : (
-                            <div className="whitespace-pre-wrap text-gray-700">{studyPlan}</div>
+                            <StudyPlanDisplay plan={studyPlan} />
                         )}
                     </div>
                 </div>
