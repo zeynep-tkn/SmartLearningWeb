@@ -3,6 +3,24 @@ import axios from 'axios';
 import { getToken } from '../auth';
 import { useNavigate } from 'react-router-dom';
 
+interface FeatureCardProps {
+    icon: JSX.Element;
+    title: string;
+    description: string;
+}
+
+const FeatureCard: React.FC<FeatureCardProps> = ({ icon, title, description }) => (
+    <div className="bg-white p-6 rounded-lg border border-gray-200 text-center">
+        <div className="flex justify-center mb-4">
+            <div className="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center">
+                {icon}
+            </div>
+        </div>
+        <h3 className="text-lg font-semibold text-gray-800 mb-2">{title}</h3>
+        <p className="text-gray-600 text-sm">{description}</p>
+    </div>
+);
+
 export default function DashboardPage() {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [message, setMessage] = useState('');
@@ -106,52 +124,72 @@ export default function DashboardPage() {
     };
 
     return (
-        <div className="space-y-8">
-            <div className="bg-white p-8 rounded-lg shadow-md">
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">Döküman Yükle</h2>
-                <p className="text-gray-600 mb-6">Analiz etmek ve quiz oluşturmak için bir .pdf veya .docx dosyası seçin.</p>
+        <div className="space-y-12">
+            {/* BÖLÜM 1: DOKÜMAN YÜKLEME ALANI */}
+            <div className="bg-white p-8 rounded-lg shadow-lg text-center">
+                <h2 className="text-3xl font-bold text-gray-800 mb-2">Döküman Yükle</h2>
+                <p className="text-gray-600 mb-6 max-w-2xl mx-auto">Öğrenme sürecinizi hızlandırın. Ders notlarınızı, makalelerinizi veya herhangi bir dökümanı yükleyin, sizin için özetleyip kişiselleştirilmiş quizler oluşturalım.</p>
                 
-                <div className="flex items-center space-x-4">
-                    <label className="w-full flex items-center px-4 py-2 bg-white text-indigo-600 rounded-lg shadow-sm tracking-wide border border-indigo-600 cursor-pointer hover:bg-indigo-600 hover:text-white">
-                        <svg className="w-6 h-6 mr-2" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                            <path d="M16.88 9.1A4 4 0 0 1 16 17H5a5 5 0 0 1-1-9.9V7a3 3 0 0 1 4.52-2.59A4.98 4.98 0 0 1 17 8c0 .38-.04.74-.12 1.1zM11 11h3l-4 4-4-4h3V3h2v8z" />
-                        </svg>
-                        <span className="truncate max-w-xs">{selectedFile ? selectedFile.name : 'Dosya Seç'}</span>
+                <div className="mt-4 flex flex-col items-center justify-center w-full">
+                    <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-indigo-300 border-dashed rounded-lg cursor-pointer bg-indigo-50 hover:bg-indigo-100 transition-colors">
+                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                            <svg className="w-10 h-10 mb-3 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                            <p className="mb-2 text-sm text-indigo-700"><span className="font-semibold">Dosya seçmek için tıklayın</span> veya sürükleyip bırakın</p>
+                            <p className="text-xs text-gray-500">PDF veya DOCX</p>
+                        </div>
                         <input ref={fileInputRef} type="file" accept=".pdf,.docx" onChange={handleFileChange} className="hidden" />
                     </label>
-                    <button onClick={handleUpload} disabled={isLoading || !selectedFile} className="flex-shrink-0 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg shadow-md disabled:bg-indigo-400 disabled:cursor-not-allowed">
-                        {isLoading && !uploadedDocument ? 'Yükleniyor...' : 'Yükle'}
+                    {selectedFile && <p className="mt-4 text-gray-700">Seçilen Dosya: <strong>{selectedFile.name}</strong></p>}
+                    <button onClick={handleUpload} disabled={isLoading || !selectedFile} className="mt-4 w-full max-w-xs bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-md disabled:bg-indigo-400 disabled:cursor-not-allowed transition-transform transform hover:scale-105">
+                        {isLoading && !uploadedDocument ? 'Yükleniyor...' : 'Yükle ve Analiz Et'}
                     </button>
                 </div>
             </div>
 
+            {/* BÖLÜM 2: QUIZ SEÇENEKLERİ (Dosya Yüklendikten Sonra Görünür) */}
             {uploadedDocument && (
-                <div className="bg-white p-8 rounded-lg shadow-md animate-fade-in">
-                    <h3 className="text-xl font-bold text-gray-800 mb-4">Quiz Seçenekleri</h3>
-                    <p className="text-gray-600 mb-6"><strong>Yüklenen Dosya:</strong> {uploadedDocument.fileName}</p>
-                    <div className="flex items-center space-x-4">
-                        <div>
-                            <label htmlFor="question-count" className="block text-sm font-medium text-gray-700 mb-1">Soru Sayısı</label>
+                <div className="bg-white p-8 rounded-lg shadow-lg animate-fade-in">
+                    <h3 className="text-2xl font-bold text-gray-800 mb-4">Quiz Seçenekleri</h3>
+                    <p className="text-gray-600 mb-6"><strong>'{uploadedDocument.fileName}'</strong> için quiz oluşturmaya hazırsınız.</p>
+                    <div className="flex flex-wrap items-center gap-4">
+                        <div className="flex items-center space-x-2">
+                            <label htmlFor="question-count" className="font-medium text-gray-700">Soru Sayısı:</label>
                             <select id="question-count" value={questionCount} onChange={(e) => setQuestionCount(Number(e.target.value))} className="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                 <option value={10}>10 Soru</option>
                                 <option value={20}>20 Soru</option>
                                 <option value={30}>30 Soru</option>
                             </select>
                         </div>
-                        <button onClick={handlePdfDownload} disabled={isLoading} className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg shadow-md disabled:bg-green-400">
+                        <button onClick={handlePdfDownload} disabled={isLoading} className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg shadow-md disabled:bg-green-400 transition-transform transform hover:scale-105">
                             {isLoading ? 'Oluşturuluyor...' : 'PDF Olarak İndir'}
                         </button>
-                       <button 
-                           onClick={() => navigate(`/quiz/${uploadedDocument.id}?count=${questionCount}`)} 
-                           disabled={isLoading} 
-                           className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-md disabled:bg-blue-400">
-                           Web'de Çöz
+                        <button onClick={() => navigate(`/quiz/${uploadedDocument.id}?count=${questionCount}`)} disabled={isLoading} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-md disabled:bg-blue-400 transition-transform transform hover:scale-105">
+                            Web'de Çöz
                         </button>
                     </div>
                 </div>
             )}
 
             {message && <p className="mt-4 text-center text-gray-600">{message}</p>}
+
+            {/* BÖLÜM 3: UYGULAMA ÖZELLİKLERİ */}
+            <div className="grid md:grid-cols-3 gap-8">
+                <FeatureCard 
+                    icon={<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.898 20.562L16.25 22.5l-.648-1.938a3.375 3.375 0 00-2.696-2.696L11.25 18l1.938-.648a3.375 3.375 0 002.696-2.696L16.25 13.5l.648 1.938a3.375 3.375 0 002.696 2.696L21 18.75l-1.938.648a3.375 3.375 0 00-2.696 2.696z" /></svg>}
+                    title="Anında Quiz Oluşturma"
+                    description="Yapay zeka, dökümanınızın en önemli noktalarından saniyeler içinde zorlayıcı ve öğretici sorular üretir."
+                />
+                <FeatureCard 
+                    icon={<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" /></svg>}
+                    title="Kişiselleştirilmiş Tekrar Planı"
+                    description="Quiz'deki yanlışlarınıza göre, hangi konulara odaklanmanız gerektiğini gösteren özel bir çalışma planı alın."
+                />
+                <FeatureCard 
+                    icon={<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>}
+                    title="PDF Olarak İndirme"
+                    description="Oluşturulan quiz'leri cevap anahtarıyla birlikte PDF olarak indirin ve istediğiniz zaman, istediğiniz yerde çalışın."
+                />
+            </div>
         </div>
     );
 }

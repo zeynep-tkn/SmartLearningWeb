@@ -29,6 +29,8 @@ export default function QuizPage() {
     const [studyPlan, setStudyPlan] = useState<string | null>(null);
     const [isPlanLoading, setIsPlanLoading] = useState(false);
 
+    const [isMoreLoading, setIsMoreLoading] = useState(false);
+
     // Quiz'i API'den çekme
     useEffect(() => {
         const fetchQuiz = async () => {
@@ -45,9 +47,8 @@ export default function QuizPage() {
             try {
                 const response = await axios.post(
                    `https://localhost:7101/api/quiz/generate-from-document/${documentId}?questionCount=${questionCount}`,
-                    {},
-                    { 
-                    headers: { 'Authorization': `Bearer ${token}` } }
+                    { existingQuestionTexts: [] }, 
+                    { headers: { 'Authorization': `Bearer ${token}` } }
                 );
                 setQuestions(response.data);
             } catch (err) {
@@ -110,6 +111,37 @@ export default function QuizPage() {
             setStudyPlan("Çalışma planı oluşturulurken bir hata meydana geldi.");
         } finally {
             setIsPlanLoading(false);
+        }
+    };
+
+    const handleGenerateMoreQuestions = async () => {
+        if (!documentId) return;
+
+        setIsMoreLoading(true);
+        const token = getToken();
+        const existingQuestionTexts = questions.map(q => q.questionText);
+
+        try {
+            const response = await axios.post(
+                `https://localhost:7101/api/quiz/generate-from-document/${documentId}?questionCount=10`,
+                { existingQuestionTexts }, // Mevcut soruları body'de gönderiyoruz
+                { headers: { 'Authorization': `Bearer ${token}` } }
+            );
+            
+            const newQuestions = response.data;
+            setQuestions(prevQuestions => [...prevQuestions, ...newQuestions]); // Yeni soruları eskilere ekle
+            
+            // Quiz'i sıfırla
+            setIsQuizFinished(false);
+            setUserAnswers({});
+            setScore(0);
+            setStudyPlan(null);
+
+        } catch (error) {
+            console.error("Daha fazla soru üretilirken hata oluştu:", error);
+            alert("Yeni soru üretilirken bir hata oluştu.");
+        } finally {
+            setIsMoreLoading(false);
         }
     };
 
@@ -222,6 +254,16 @@ export default function QuizPage() {
                             </div>
                         );
                     })}
+
+                    <div className="text-center mt-8">
+                    <button 
+                        onClick={handleGenerateMoreQuestions}
+                        disabled={isMoreLoading}
+                        className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-lg shadow-md disabled:bg-purple-400"
+                    >
+                        {isMoreLoading ? "Üretiliyor..." : "10 Soru Daha Üret"}
+                    </button>
+                    </div>
 
                     <hr className="my-8"/>
                     
