@@ -16,7 +16,12 @@ export default function LoginPage() {
         setIsLoading(true);
 
         try {
-            const response = await axios.post('https://localhost:7101/api/account/login', { email, password });
+            // const response = await axios.post('https://localhost:7101/api/account/login', { email, password });
+            const apiUrl = `${import.meta.env.VITE_API_URL}/api/account/login`;
+            const response = await axios.post(apiUrl, {
+              email: email,
+              password: password
+            });
             const token = response.data.token;
             if (token) {
                 saveToken(token);

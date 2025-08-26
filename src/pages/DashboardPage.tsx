@@ -58,7 +58,7 @@ export default function DashboardPage() {
         setMessage('Dosya yükleniyor...');
 
         try {
-            const response = await axios.post('https://localhost:7101/api/document/upload', formData, {
+            const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/document/upload`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     'Authorization': `Bearer ${token}`
@@ -92,7 +92,7 @@ export default function DashboardPage() {
 
         try {
             const response = await axios.post(
-                `https://localhost:7101/api/pdf/generate-quiz/${uploadedDocument.id}?questionCount=${questionCount}`,
+                `${import.meta.env.VITE_API_URL}/api/pdf/generate-quiz/${uploadedDocument.id}?questionCount=${questionCount}`,
                 {},
                 {
                     headers: { 'Authorization': `Bearer ${token}` },

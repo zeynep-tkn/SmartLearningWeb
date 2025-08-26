@@ -46,7 +46,7 @@ export default function QuizPage() {
             }
             try {
                 const response = await axios.post(
-                   `https://localhost:7101/api/quiz/generate-from-document/${documentId}?questionCount=${questionCount}`,
+                   `${import.meta.env.VITE_API_URL}/api/quiz/generate-from-document/${documentId}?questionCount=${questionCount}`,
                     { existingQuestionTexts: [] }, 
                     { headers: { 'Authorization': `Bearer ${token}` } }
                 );
@@ -101,7 +101,7 @@ export default function QuizPage() {
         const token = getToken();
         try {
             const response = await axios.post(
-                'https://localhost:7101/api/quiz/generate-study-plan',
+                `${import.meta.env.VITE_API_URL}/api/quiz/generate-study-plan`,
                 { wrongQuestionsText },
                 { headers: { 'Authorization': `Bearer ${token}` } }
             );
@@ -123,7 +123,7 @@ export default function QuizPage() {
 
         try {
             const response = await axios.post(
-                `https://localhost:7101/api/quiz/generate-from-document/${documentId}?questionCount=10`,
+                `${import.meta.env.VITE_API_URL}/api/quiz/generate-from-document/${documentId}?questionCount=10`,
                 { existingQuestionTexts }, // Mevcut soruları body'de gönderiyoruz
                 { headers: { 'Authorization': `Bearer ${token}` } }
             );

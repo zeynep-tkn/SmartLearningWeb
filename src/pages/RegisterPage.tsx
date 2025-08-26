@@ -16,7 +16,8 @@ export default function RegisterPage() {
         setIsLoading(true);
 
         try {
-            await axios.post('https://localhost:7101/api/account/register', { email, password });
+            await axios.post(`${import.meta.env.VITE_API_URL}/api/account/register`, { email, password });
+            
             navigate('/login', { state: { message: 'Kayıt başarılı! Lütfen giriş yapın.' } });
         } catch (err: any) {
             if (err.response && err.response.data && Array.isArray(err.response.data)) {
